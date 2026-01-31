@@ -1,0 +1,35 @@
+{
+  "jobs": [
+    {
+      "prompt": "The subject in the image starts walking forward, camera follows smoothly",
+      "input_reference": "https://example.com/image1.jpg",
+      "seconds": 8,
+      "size": "1280x720",
+      "output_path": "animated_walk.mp4"
+    },
+    {
+      "prompt": "Gentle wind blows through the scene, leaves and hair moving naturally",
+      "input_reference": "https://example.com/image2.jpg",
+      "seconds": 4,
+      "size": "1080x1920",
+      "output_path": "animated_wind.mp4"
+    },
+    {
+      "prompt": "Camera slowly zooms in while the subject smiles and waves",
+      "input_reference": "https://example.com/image3.jpg",
+      "seconds": 4,
+      "size": "1080x1080",
+      "output_path": "animated_zoom.mp4"
+    }
+  ],
+  "output_dir": "./output/image-to-video",
+  "max_concurrent": 2,
+  "default_model": "sora-2",
+  "poll_interval": 15000,
+  "max_poll_attempts": 150,
+  "retry_policy": {
+    "max_retries": 2,
+    "retry_delay_ms": 2000,
+    "retry_on_errors": ["rate_limit", "timeout", "429", "503"]
+  }
+}

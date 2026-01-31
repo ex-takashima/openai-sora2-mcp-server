@@ -1,0 +1,12 @@
+{
+  "jobs": [
+    {
+      "prompt": "A golden retriever puppy playing with autumn leaves in a sunlit park, leaves swirling around, warm afternoon light, cinematic slow motion",
+      "seconds": 4,
+      "size": "1280x720"
+    }
+  ],
+  "output_dir": "C:\\Users\\jtaka\\Downloads\\sora2-videos",
+  "max_concurrent": 1,
+  "default_model": "sora-2"
+}

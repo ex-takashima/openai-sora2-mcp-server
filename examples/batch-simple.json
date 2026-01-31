@@ -1,0 +1,24 @@
+{
+  "jobs": [
+    {
+      "prompt": "A cat playing piano in a jazz bar, cinematic lighting, smooth camera movement",
+      "seconds": 8,
+      "size": "1280x720"
+    },
+    {
+      "prompt": "Ocean waves crashing on a rocky shore at sunset, golden hour lighting, slow motion",
+      "seconds": 4,
+      "size": "1920x1080"
+    },
+    {
+      "prompt": "A butterfly landing on a colorful flower in a garden, macro shot, shallow depth of field",
+      "seconds": 4,
+      "size": "1080x1080"
+    }
+  ],
+  "output_dir": "./output",
+  "max_concurrent": 2,
+  "default_model": "sora-2",
+  "default_size": "1280x720",
+  "default_seconds": 4
+}

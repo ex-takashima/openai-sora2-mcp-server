@@ -1,0 +1,35 @@
+{
+  "jobs": [
+    {
+      "prompt": "A person walking in a park during autumn",
+      "seconds": 8,
+      "size": "1280x720",
+      "output_path": "original_autumn.mp4"
+    },
+    {
+      "prompt": "Change the season to winter with snow falling gently, keep the same camera movement",
+      "remix_video_id": "VIDEO_ID_HERE",
+      "output_path": "remix_winter.mp4"
+    },
+    {
+      "prompt": "Make it nighttime with street lights glowing warmly, same walking motion",
+      "remix_video_id": "VIDEO_ID_HERE",
+      "output_path": "remix_night.mp4"
+    },
+    {
+      "prompt": "Transform to a spring scene with cherry blossoms falling, maintain the original pace",
+      "remix_video_id": "VIDEO_ID_HERE",
+      "output_path": "remix_spring.mp4"
+    }
+  ],
+  "output_dir": "./output/remixes",
+  "max_concurrent": 1,
+  "poll_interval": 20000,
+  "max_poll_attempts": 120,
+  "default_model": "sora-2",
+  "retry_policy": {
+    "max_retries": 3,
+    "retry_delay_ms": 5000,
+    "retry_on_errors": ["rate_limit", "timeout", "429", "503", "500"]
+  }
+}
