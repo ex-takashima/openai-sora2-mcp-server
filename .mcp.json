@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "job-manager": {
-      "type": "sse",
-      "url": "http://100.91.104.73:3001/sse"
-    }
-  }
-}
