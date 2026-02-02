@@ -70,7 +70,7 @@ export interface GenerateVideoParams {
   model?: Model;
   size?: Size;
   seconds?: number | string;
-  input_reference?: string; // Image-to-Video: URL or base64 encoded image
+  input_reference?: string; // Image-to-Video: local file path, URL, or base64 data URI (jpeg/png/webp)
   output_path?: string;
 }
 

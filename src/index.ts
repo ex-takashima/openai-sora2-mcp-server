@@ -93,7 +93,8 @@ Models:
 
 Resolutions: 1920x1080, 1280x720 (16:9), 1080x1920, 720x1280 (9:16), 1080x1080, 480x480 (1:1)
 
-For image-to-video, provide input_reference with image URL or base64 data.`,
+For image-to-video, provide input_reference with local file path, URL, or base64 data URI.
+Supported formats: JPEG, PNG, WebP. Image resolution should match output size.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -117,7 +118,7 @@ For image-to-video, provide input_reference with image URL or base64 data.`,
         },
         input_reference: {
           type: 'string',
-          description: 'For image-to-video: URL or base64 encoded image. Image resolution should match output size.',
+          description: 'For image-to-video: local file path, URL, or base64 data URI. Supported formats: JPEG, PNG, WebP.',
         },
         output_path: {
           type: 'string',

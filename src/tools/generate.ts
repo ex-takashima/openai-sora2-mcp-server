@@ -2,6 +2,8 @@
  * Video generation tool implementation
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
 import {
   type GenerateVideoParams,
   type VideoGenerationResult,
@@ -32,6 +34,79 @@ import {
 import { debugLog, errorLog } from '../utils/debug.js';
 
 const OPENAI_API_BASE = 'https://api.openai.com/v1';
+
+/**
+ * Supported image MIME types for input_reference
+ */
+const SUPPORTED_IMAGE_TYPES: Record<string, string> = {
+  '.jpeg': 'image/jpeg',
+  '.jpg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+};
+
+/**
+ * Get MIME type from file extension
+ */
+function getMimeType(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase();
+  return SUPPORTED_IMAGE_TYPES[ext] || 'image/jpeg';
+}
+
+/**
+ * Check if a string is a URL
+ */
+function isUrl(str: string): boolean {
+  return str.startsWith('http://') || str.startsWith('https://');
+}
+
+/**
+ * Check if a string is base64 data URI
+ */
+function isBase64DataUri(str: string): boolean {
+  return str.startsWith('data:image/');
+}
+
+/**
+ * Download image from URL and return as Buffer with MIME type
+ */
+async function downloadImage(url: string): Promise<{ buffer: Buffer; mimeType: string; filename: string }> {
+  debugLog('Downloading image from URL:', url);
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to download image: ${response.status} ${response.statusText}`);
+  }
+
+  const contentType = response.headers.get('content-type') || 'image/jpeg';
+  const buffer = Buffer.from(await response.arrayBuffer());
+
+  // Extract filename from URL or generate one
+  const urlPath = new URL(url).pathname;
+  const filename = path.basename(urlPath) || 'image.jpg';
+
+  return { buffer, mimeType: contentType, filename };
+}
+
+/**
+ * Parse base64 data URI and return as Buffer with MIME type
+ */
+function parseBase64DataUri(dataUri: string): { buffer: Buffer; mimeType: string; filename: string } {
+  const matches = dataUri.match(/^data:(image\/\w+);base64,(.+)$/);
+  if (!matches) {
+    throw new Error('Invalid base64 data URI format');
+  }
+
+  const mimeType = matches[1];
+  const base64Data = matches[2];
+  const buffer = Buffer.from(base64Data, 'base64');
+
+  // Generate filename based on MIME type
+  const ext = mimeType.split('/')[1] || 'jpg';
+  const filename = `image.${ext}`;
+
+  return { buffer, mimeType, filename };
+}
 
 /**
  * Options for video generation
@@ -113,30 +188,87 @@ export async function generateVideo(
       outputPath = await generateUniqueFilePath(outputPath);
     }
 
-    // Build request body
-    // Note: OpenAI API expects 'seconds' as a string literal ("4", "8", "12"), not a number
-    const requestBody: Record<string, unknown> = {
-      prompt: params.prompt,
-      model,
-      size,
-      seconds: String(seconds),
-    };
+    let response: Response;
 
-    // Add input_reference for image-to-video
+    // Use multipart/form-data for image-to-video, JSON for text-to-video
     if (params.input_reference) {
-      requestBody.input_reference = params.input_reference;
-    }
+      // Image-to-video: use multipart/form-data
+      debugLog('Using multipart/form-data for image-to-video...');
 
-    // Make API request
-    debugLog('Sending video generation request...');
-    const response = await fetch(`${OPENAI_API_BASE}/videos`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(requestBody),
-    });
+      const formData = new FormData();
+      formData.append('prompt', params.prompt);
+      formData.append('model', model);
+      formData.append('size', size);
+      formData.append('seconds', String(seconds));
+
+      // Process input_reference based on its type
+      let imageBuffer: Buffer;
+      let imageMimeType: string;
+      let imageFilename: string;
+
+      if (isUrl(params.input_reference)) {
+        // Download image from URL
+        const downloaded = await downloadImage(params.input_reference);
+        imageBuffer = downloaded.buffer;
+        imageMimeType = downloaded.mimeType;
+        imageFilename = downloaded.filename;
+      } else if (isBase64DataUri(params.input_reference)) {
+        // Parse base64 data URI
+        const parsed = parseBase64DataUri(params.input_reference);
+        imageBuffer = parsed.buffer;
+        imageMimeType = parsed.mimeType;
+        imageFilename = parsed.filename;
+      } else {
+        // Assume it's a local file path
+        const filePath = params.input_reference;
+        if (!fs.existsSync(filePath)) {
+          throw new Error(`Image file not found: ${filePath}`);
+        }
+        imageBuffer = fs.readFileSync(filePath);
+        imageMimeType = getMimeType(filePath);
+        imageFilename = path.basename(filePath);
+      }
+
+      // Create Blob and append to FormData
+      // Convert Buffer to ArrayBuffer for Blob compatibility
+      const arrayBuffer = imageBuffer.buffer.slice(
+        imageBuffer.byteOffset,
+        imageBuffer.byteOffset + imageBuffer.byteLength
+      ) as ArrayBuffer;
+      const imageBlob = new Blob([arrayBuffer], { type: imageMimeType });
+      formData.append('input_reference', imageBlob, imageFilename);
+
+      debugLog(`Uploading image: ${imageFilename} (${imageMimeType}, ${imageBuffer.length} bytes)`);
+
+      // Make API request with FormData
+      response = await fetch(`${OPENAI_API_BASE}/videos`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          // Note: Don't set Content-Type header, fetch will set it automatically with boundary
+        },
+        body: formData,
+      });
+    } else {
+      // Text-to-video: use JSON
+      debugLog('Using JSON for text-to-video...');
+
+      const requestBody = {
+        prompt: params.prompt,
+        model,
+        size,
+        seconds: String(seconds),
+      };
+
+      response = await fetch(`${OPENAI_API_BASE}/videos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
