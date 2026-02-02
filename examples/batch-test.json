@@ -6,7 +6,7 @@
       "size": "1280x720"
     }
   ],
-  "output_dir": "C:\\Users\\jtaka\\Downloads\\sora2-videos",
+  "output_dir": "./output",
   "max_concurrent": 1,
   "default_model": "sora-2"
 }
