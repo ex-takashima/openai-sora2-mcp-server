@@ -1,0 +1,15 @@
+{
+  "jobs": [
+    {
+      "prompt": "The anime girl turns to look at the sunset, her hair and clothes gently swaying in the warm evening breeze. The clouds slowly drift across the colorful sky. Cinematic anime style.",
+      "input_reference": "C:/projects/openai-sora2-mcp-server/test/nanocanvas_2026-02-02T03-54-32.jpg",
+      "seconds": 4,
+      "size": "1280x720",
+      "output_path": "sunset-anime.mp4"
+    }
+  ],
+  "output_dir": "./test/output",
+  "default_model": "sora-2",
+  "poll_interval": 15000,
+  "max_poll_attempts": 150
+}

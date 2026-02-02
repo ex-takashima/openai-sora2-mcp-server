@@ -13,6 +13,13 @@ dist/
 output/
 *.mp4
 
+# Test assets (images, videos)
+test/output/
+test/*.png
+test/*.jpg
+test/*.jpeg
+test/*.webp
+
 # IDE
 .vscode/
 .idea/

@@ -1,6 +1,6 @@
 {
   "name": "openai-sora2-mcp-server",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "MCP Server for OpenAI Sora 2 Video Generation API",
   "type": "module",
   "main": "dist/index.js",
